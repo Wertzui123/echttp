@@ -301,9 +301,8 @@ echttp_internal_Status echttp_process_request(echttp_internal_Request* request)
 
     if (!request->request_sent)
     {
-        unsigned char* request_header = request->request_header_large ?
-            request->request_header_large : request->request_header;
-        if ((request->tls_context == NULL ? send(request->socket, (char*)request_header, (int)strlen(request_header), 0) : echttp_tlse_wrapper_write_tls(request->socket, request->tls_context, request_header, (int)strlen((char*)request_header))) == -1)
+        char* request_header = request->request_header_large ? request->request_header_large : request->request_header;
+        if ((request->tls_context == NULL ? send(request->socket, (const char*)request_header, (int)strlen(request_header), 0) : echttp_tlse_wrapper_write_tls(request->socket, request->tls_context, (const unsigned char*)request_header, (int)strlen(request_header))) == -1)
         {
             request->status = HTTP_STATUS_FAILED;
             return request->status;

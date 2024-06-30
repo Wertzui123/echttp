@@ -96,8 +96,8 @@ int echttp_tlse_wrapper_connect_tls(int sockfd, struct TLSContext* context)
     unsigned char client_message[0xFFFF];
     for (;;)
     {
-        int read_size = recv(sockfd, client_message, sizeof(client_message), 0);
-        tls_consume_stream(context, client_message, read_size, echttp_tlse_wrapper_validate_certificate);
+        int read_size = recv(sockfd, (char*)client_message, sizeof(client_message), 0);
+        tls_consume_stream(context, (const unsigned char*)client_message, read_size, echttp_tlse_wrapper_validate_certificate);
         echttp_tlse_wrapper_send_pending(sockfd, context);
         if (tls_established(context))
         {
@@ -109,7 +109,7 @@ int echttp_tlse_wrapper_connect_tls(int sockfd, struct TLSContext* context)
 
 int echttp_tlse_wrapper_read_tls(int sockfd, struct TLSContext* context, void* buffer, int len)
 {
-    char client_message[0xFFFF];
+    unsigned char client_message[0xFFFF];
     int read_res;
     int read_size;
     int read = 0;
@@ -129,12 +129,12 @@ int echttp_tlse_wrapper_read_tls(int sockfd, struct TLSContext* context, void* b
         {
             break;
         }
-        read_size = recv(sockfd, client_message, sizeof(client_message), 0);
+        read_size = recv(sockfd, (char*)client_message, sizeof(client_message), 0);
         if (read_size <= 0)
         {
             break;
         }
-        tls_consume_stream(context, client_message, read_size, echttp_tlse_wrapper_validate_certificate);
+        tls_consume_stream(context, (const unsigned char*)client_message, read_size, echttp_tlse_wrapper_validate_certificate);
         echttp_tlse_wrapper_send_pending(sockfd, context);
     }
     return read;
