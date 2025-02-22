@@ -64,6 +64,7 @@ void echttp_release(echttp_Response response);
 #pragma comment (lib, "Ws2_32.lib") 
 #include <string.h>
 #include <stdio.h>
+#include <io.h>
 #define HTTP_SOCKET SOCKET
 #define HTTP_INVALID_SOCKET INVALID_SOCKET
 #else
@@ -595,7 +596,7 @@ void echttp_release(echttp_Response response)
 #endif
 
         if (request->request_header_large) ECHTTP_FREE(request->request_header_large);
-        ECHTTP_FREE(request->response_data);
+        //ECHTTP_FREE(request->response_data);
         ECHTTP_FREE(request);
 #ifdef _WIN32
         WSACleanup();
