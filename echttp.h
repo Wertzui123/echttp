@@ -218,6 +218,7 @@ echttp_internal_Request* echttp_build_request(char const* method, char const* ur
     struct TLSContext* tls_context = NULL;
     if (is_https) {
         tls_context = tls_create_context(0, TLS_V12);
+        tls_sni_set(tls_context, address); // TODO: Should we use this here? It looks like it is required for "www.google.com" for example
         echttp_tlse_wrapper_connect_tls(socket, tls_context);
     }
 
