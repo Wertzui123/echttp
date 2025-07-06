@@ -20,6 +20,8 @@ typedef struct echttp_Response
     echttp_Header* headers;
     size_t response_size;
     char const* data;
+    size_t full_response_size; // includes the raw header lines as well as the actual data
+    char const* full_response_data; // see above
 } echttp_Response;
 
 echttp_Response echttp_request(char const* method, char const* url, char const* data, size_t data_size, echttp_Header* headers, size_t header_count);
@@ -119,6 +121,8 @@ typedef struct echttp_internal_Request
     size_t response_data_size;
     size_t response_data_capacity;
     void* response_data;
+    size_t full_response_data_size;
+    void* full_response_data;
 } echttp_internal_Request;
 
 static int echttp_internal_parse_url(char const* url, char* address, size_t address_capacity, char* port, size_t port_capacity, char const** resource, char* is_https)
@@ -481,6 +485,8 @@ echttp_internal_Status echttp_process_request(echttp_internal_Request* request)
             }
 
             request->status = request->status_code < 300 ? HTTP_STATUS_COMPLETED : HTTP_STATUS_FAILED;
+            request->full_response_data = request->response_data;
+            request->full_response_data_size = request->response_data_size;
             request->response_data = (void*)(((uintptr_t)request->response_data) + header_size);
             request->response_data_size = request->response_data_size - header_size;
 
@@ -537,6 +543,8 @@ echttp_Response echttp_request(char const* method, char const* url, char const* 
     response.headers = request->response_headers;
     response.response_size = request->response_data_size;
     response.data = (char*)request->response_data;
+    response.full_response_size = request->full_response_data_size;
+    response.full_response_data = (char*)request->full_response_data;
     return response;
 }
 
@@ -597,7 +605,7 @@ void echttp_release(echttp_Response response)
 #endif
 
         if (request->request_header_large) ECHTTP_FREE(request->request_header_large);
-        //ECHTTP_FREE(request->response_data);
+        ECHTTP_FREE(request->full_response_data);
         ECHTTP_FREE(request);
 #ifdef _WIN32
         WSACleanup();
