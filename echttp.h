@@ -112,7 +112,7 @@ typedef struct echttp_internal_Request
     char address[256];
     char request_header[256];
     char* request_header_large;
-    void* request_data;
+    void const* request_data;
     size_t request_data_size;
     char response_http_version[9];
     char response_reason_phrase[1024];
@@ -174,7 +174,7 @@ static int echttp_internal_parse_url(char const* url, char* address, size_t addr
     return 1;
 }
 
-static echttp_internal_Request* echttp_internal_create_handle(void* request_data, size_t request_data_size)
+static echttp_internal_Request* echttp_internal_create_handle(void const* request_data, size_t request_data_size)
 {
     echttp_internal_Request* request = (echttp_internal_Request*)ECHTTP_MALLOC(sizeof(echttp_internal_Request));
 
