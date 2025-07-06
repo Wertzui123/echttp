@@ -174,9 +174,9 @@ static int echttp_internal_parse_url(char const* url, char* address, size_t addr
     return 1;
 }
 
-static echttp_internal_Request* echttp_internal_create_handle(size_t request_data_size)
+static echttp_internal_Request* echttp_internal_create_handle(void* request_data, size_t request_data_size)
 {
-    echttp_internal_Request* request = (echttp_internal_Request*)ECHTTP_MALLOC(sizeof(echttp_internal_Request) + request_data_size);
+    echttp_internal_Request* request = (echttp_internal_Request*)ECHTTP_MALLOC(sizeof(echttp_internal_Request));
 
     request->status = HTTP_STATUS_PENDING;
     request->status_code = 0;
@@ -184,8 +184,8 @@ static echttp_internal_Request* echttp_internal_create_handle(size_t request_dat
     request->connect_pending = 1;
     request->request_sent = 0;
 
-    request->request_data = NULL;
-    request->request_data_size = 0;
+    request->request_data_size = request_data_size;
+    request->request_data = request_data;
 
     strcpy(request->response_http_version, "");
 
@@ -226,7 +226,7 @@ echttp_internal_Request* echttp_build_request(char const* method, char const* ur
         echttp_tlse_wrapper_connect_tls(socket, tls_context);
     }
 
-    echttp_internal_Request* request = echttp_internal_create_handle(size);
+    echttp_internal_Request* request = echttp_internal_create_handle(data, size);
     request->socket = socket;
     request->tls_context = tls_context;
 
@@ -272,10 +272,6 @@ echttp_internal_Request* echttp_build_request(char const* method, char const* ur
         sprintf(request_header + strlen(request_header), "\r\n");
     }
     sprintf(request_header + strlen(request_header), "\r\n");
-
-    request->request_data_size = size;
-    request->request_data = (request + 1);
-    memcpy(request->request_data, data, size);
 
     return request;
 }
