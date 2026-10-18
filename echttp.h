@@ -246,6 +246,7 @@ echttp_internal_Request* echttp_build_request(char const* method, char const* ur
     }
     uppercase_method[strlen(method)] = '\0';
     sprintf(request_header, "%s %s HTTP/1.0\r\nHost: %s%s%s\r\nContent-Length: %d\r\n", uppercase_method, resource, address, default_http_port ? "" : ":", default_http_port ? "" : port, (int)size);
+    ECHTTP_FREE(uppercase_method);
     for (size_t i = 0; i < header_count; i++)
     {
         sprintf(request_header + strlen(request_header), "%s: ", headers[i].name);
@@ -492,6 +493,7 @@ void echttp_release_request(echttp_internal_Request request)
         ECHTTP_FREE(header.values);
     }
     ECHTTP_FREE(request.response_headers);
+    tls_destroy_context(request.tls_context);
 #ifdef _WIN32
     WSACleanup();
 #endif
@@ -524,10 +526,13 @@ echttp_Response echttp_request(char const* method, char const* url, char const* 
             {
                 if (strcmp(request->response_headers[i].name, "Location") == 0)
                 {
-                    const char* url = request->response_headers[i].values[0];
+                    char* url = ECHTTP_MALLOC(strlen(request->response_headers[i].values[0]) + 1);
+                    strcpy(url, request->response_headers[i].values[0]);
                     echttp_release_request(*request);
                     ECHTTP_FREE(request);
-                    return echttp_request(method, url, data, data_size, headers, header_count); // TODO: Limit the number of redirects
+                    echttp_Response response = echttp_request(method, url, data, data_size, headers, header_count); // TODO: Limit the number of redirects
+                    ECHTTP_FREE(url);
+                    return response;
                 }
             }
         }
