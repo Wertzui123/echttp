@@ -5,5 +5,8 @@ This implementation is roughly based on [http.h by Mattias Gustavsson](https://g
 
 It uses [TLSe](https://github.com/eduardsui/tlse) for TLS (previously known as SSL) support.
 
+> [!WARNING]
+> ECHTTP is not yet recommended for production use. There are known bugs and security vulnerabilities. More detailed documentation on the current state of ECHTTP regarding stability and safety will be available soon. Contributions to this project are always welcome.
+
 ## License
-This project is licensed under the [MIT License](LICENSE).
+ECHTTP is licensed under the [MIT License](LICENSE).
